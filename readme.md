@@ -1,5 +1,5 @@
 
-###Install via composer
+### Install via composer
 ````bash
 composer require dsisconeto/business-day-calculator
 ````
