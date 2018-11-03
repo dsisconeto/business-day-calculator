@@ -1,0 +1,22 @@
+{
+    "name": "dsisconeto/business-day-calculator",
+    "require-dev": {
+        "phpunit/phpunit": "^7"
+    },
+    "autoload": {
+        "psr-4": {
+            "DSisconeto\\BusinessDayCalculator\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Dejair Sisconeto",
+            "email": "dejairsisconeto23@gmail.com"
+        }
+    ]
+}
