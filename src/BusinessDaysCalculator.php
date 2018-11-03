@@ -58,6 +58,17 @@ class BusinessDaysCalculator
         return $this->calculate($startAt, $endAt, $additional);
     }
 
+    /**
+     * @param DateTime $startAt
+     * @return DateTime
+     */
+    public function nextBusinessDay(DateTime $startAt): DateTime
+    {
+        $endAt = (clone $startAt)->modify('+1 day');
+        $this->calculate($startAt, $endAt, true);
+        return $this->getDateStart();
+    }
+
 
     /**
      * @param DateTime $startAt
@@ -137,7 +148,15 @@ class BusinessDaysCalculator
     /**
      * @return DateTime
      */
-    public function getDateEnd(): DateTime
+    private function getDateStart(): DateTime
+    {
+        return (clone $this->dates[0]);
+    }
+
+    /**
+     * @return DateTime
+     */
+    private function getDateEnd(): DateTime
     {
         return (clone $this->dates[count($this->dates) - 1]);
     }

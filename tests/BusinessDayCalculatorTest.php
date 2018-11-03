@@ -57,7 +57,7 @@ class BusinessDayCalculatorTest extends TestCase
                 [DayOfWeek::SUNDAY, DayOfWeek::SATURDAY],
                 $this->getHolidays(),
                 ['2018-11-01', '2018-11-05', '2018-11-06', '2018-11-07', '2018-11-08', '2018-11-09', '2018-11-12',
-                    '2018-11-13', '2018-11-14', '2018-11-16', '2018-11-19','2018-11-20', '2018-11-21', '2018-11-22',
+                    '2018-11-13', '2018-11-14', '2018-11-16', '2018-11-19', '2018-11-20', '2018-11-21', '2018-11-22',
                     '2018-11-23', '2018-11-26', '2018-11-27', '2018-11-28', '2018-11-29',
                     '2018-11-30', '2018-12-03', '2018-12-04', '2018-12-05', '2018-12-06', '2018-12-07', '2018-12-10',
                     '2018-12-11', '2018-12-12', '2018-12-13', '2018-12-14', '2018-12-17',
@@ -87,6 +87,17 @@ class BusinessDayCalculatorTest extends TestCase
             true);
 
         $this->assertEquals($expected, $this->format($datesDaysLater));
+    }
+
+
+    public function test_next_business_day()
+    {
+        $this->businessDayPolicy->setIgnoreDaysOfWeek([DayOfWeek::SATURDAY, DayOfWeek::SUNDAY])
+            ->addHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
+
+        $nextBusinessDay = $this->businessDayCalculator->nextBusinessDay(new DateTime('2018-11-02'));
+
+        $this->assertEquals($nextBusinessDay->format('Y-m-d'), (new DateTime('2018-11-05'))->format('Y-m-d'));
     }
 
     private function format($dates): array
