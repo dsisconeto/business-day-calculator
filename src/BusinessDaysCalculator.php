@@ -14,11 +14,6 @@ use \DatePeriod;
 class BusinessDaysCalculator
 {
     /**
-     * @var DateTime[]
-     */
-    private $dates = [];
-
-    /**
      * @var BusinessDayPolicyInterface
      */
     private $businessDayPolicy;
@@ -65,8 +60,8 @@ class BusinessDaysCalculator
     public function nextBusinessDay(DateTime $startAt): DateTime
     {
         $endAt = (clone $startAt)->modify('+1 day');
-        $this->calculate($startAt, $endAt, true);
-        return $this->getDateStart();
+        $dates = $this->calculate($startAt, $endAt, true);
+        return $dates[0];
     }
 
 
@@ -78,94 +73,85 @@ class BusinessDaysCalculator
      */
     private function calculate(DateTime $startAt, DateTime $endAt, bool $additional): array
     {
-        $this->dates = [];
-        $this->fillDatePeriod($startAt, $endAt);
+        $dates = $this->fillDatePeriod($startAt, $endAt);
         if ($additional) {
-            $this->calculateWithAdditional();
+            $dates = $this->calculateWithAdditional($dates);
         } else {
-            $this->calculateWithoutAdditional();
+            $dates = $this->calculateWithoutAdditional($dates);
         }
-        return $this->dates;
+        return $dates;
     }
 
+
     /**
-     *
+     * @param DateTime[] $dates
+     * @return DateTime[]
      */
-    private function calculateWithoutAdditional()
+    private function calculateWithoutAdditional(array $dates): array
     {
-        $this->dates = $this->filterDates();
+        return $this->filterDates($dates);
     }
 
+
     /**
-     *
+     * @param DateTime[] $dates
+     * @return DateTime[]
      */
-    private function calculateWithAdditional()
+    private function calculateWithAdditional(array $dates): array
     {
         while (true) {
-            $additionalDates = $this->calculateAdditionalDate();
-            $filteredDates = $this->filterDates();
-            $this->dates = array_merge($filteredDates, $additionalDates);
+            $additionalDates = $this->calculateAdditionalDate($dates);
+            $filteredDates = $this->filterDates($dates);
+            $dates = array_merge($filteredDates, $additionalDates);
             if (count($additionalDates) === 0) break;
         }
+        return $dates;
     }
 
     /**
-     * @return array
+     * @param  DateTime[] $dates
+     * @return DateTime[]
      */
-    private function calculateAdditionalDate(): array
+    private function calculateAdditionalDate(array $dates): array
     {
         $additionalDates = [];
-        foreach ($this->dates as $date) {
+        foreach ($dates as $date) {
             if ($this->businessDayPolicy->isBusinessDay($date)) continue;
-            $additionalDates[] = $this->nextAdditionalDate($additionalDates);
+            $additionalDates[] = $this->nextAdditionalDate($additionalDates, $dates);
         }
         return $additionalDates;
     }
 
     /**
      * @param DateTime[] $additionalDates
+     * @param DateTime[] $dates
      * @return DateTime
      */
-    private function nextAdditionalDate($additionalDates): DateTime
+    private function nextAdditionalDate(array $additionalDates, array $dates): DateTime
     {
         if (empty($additionalDates)) {
-            return $this->getDateEnd()->modify('+1 day');
+            return (clone $dates[count($dates) - 1])->modify('+1 day');
         }
         return (clone $additionalDates[count($additionalDates) - 1])->modify('+1 day');
     }
 
     /**
+     * @param DateTime[] $dates
      * @return array
      */
-    private function filterDates(): array
+    private function filterDates(array $dates): array
     {
-        return array_filter($this->dates, function (DateTime $date) {
+        return array_filter($dates, function (DateTime $date) {
             return $this->businessDayPolicy->isBusinessDay($date);
         });
-    }
-
-
-    /**
-     * @return DateTime
-     */
-    private function getDateStart(): DateTime
-    {
-        return (clone $this->dates[0]);
-    }
-
-    /**
-     * @return DateTime
-     */
-    private function getDateEnd(): DateTime
-    {
-        return (clone $this->dates[count($this->dates) - 1]);
     }
 
     /**
      * @param DateTime $startAt
      * @param DateTime $endAt
+     * @return array
      */
-    private function fillDatePeriod(DateTime $startAt, DateTime $endAt)
+    private function fillDatePeriod(DateTime $startAt, DateTime $endAt): array
     {
         $endAt = clone $endAt;
         $endAt->modify('+1 day');
@@ -174,8 +160,10 @@ class BusinessDaysCalculator
             DateInterval::createFromDateString('1 day'),
             $endAt
         );
+        $dates = [];
         foreach ($period as $date) {
-            $this->dates[] = $date;
+            $dates[] = $date;
         }
+        return $dates;
     }
 }
