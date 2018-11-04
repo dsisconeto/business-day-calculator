@@ -16,4 +16,3 @@ abstract class DayOfWeek
     const FRIDAY = 5;
     const SATURDAY = 6;
 }
-

@@ -17,4 +17,3 @@ $dates = $businessDayCalculator->fromDateEnd($startAt, $endAt, false);
 
 var_dump($datesWithAdditional);
 var_dump($dates);
-

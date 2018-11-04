@@ -6,7 +6,6 @@ use \DateTime;
 use \DateInterval;
 use \DatePeriod;
 
-
 /**
  * Class BusinessDaysCalculator
  * @package DSisconeto\BusinessDayCalculator
@@ -103,7 +102,9 @@ class BusinessDaysCalculator
             $additionalDates = $this->calculateAdditionalDate($dates);
             $filteredDates = $this->filterDates($dates);
             $dates = array_merge($filteredDates, $additionalDates);
-            if (count($additionalDates) === 0) break;
+            if (count($additionalDates) === 0) {
+                break;
+            };
         }
         return $dates;
     }
@@ -116,7 +117,9 @@ class BusinessDaysCalculator
     {
         $additionalDates = [];
         foreach ($dates as $date) {
-            if ($this->businessDayPolicy->isBusinessDay($date)) continue;
+            if ($this->businessDayPolicy->isBusinessDay($date)) {
+                continue;
+            }
             $additionalDates[] = $this->nextAdditionalDate($additionalDates, $dates);
         }
         return $additionalDates;

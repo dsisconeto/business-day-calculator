@@ -2,9 +2,7 @@
 
 namespace DSisconeto\BusinessDayCalculator;
 
-
 use DateTime;
-
 
 /**
  * Class BusinessDayPolicy
@@ -120,6 +118,4 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
         $this->businessDayPolicyAdditional = $businessDayPolicyAdditional;
         return $this;
     }
-
-
 }

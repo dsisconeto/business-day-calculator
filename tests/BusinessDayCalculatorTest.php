@@ -1,7 +1,6 @@
 <?php
 
-namespace Test;
-
+namespace Tests;
 
 use DateTime;
 use DSisconeto\BusinessDayCalculator\DayOfWeek;
@@ -77,20 +76,17 @@ class BusinessDayCalculatorTest extends TestCase
      * @param $daysLater
      * @dataProvider dataProviderForDayLaterWithAdditional
      */
-    public function test_from_day_later_with_additional_days($ignoreDaysOfWeek, $holidays, $expected, $startAt, $daysLater)
+    public function testFromDayLaterWithAdditionalDays($ignoreDaysOfWeek, $holidays, $expected, $startAt, $daysLater)
     {
         $this->businessDayPolicy->setIgnoreDaysOfWeek($ignoreDaysOfWeek)
             ->addHolidays($holidays);
-        $datesDaysLater = $this->businessDayCalculator->fromDays(
-            $startAt,
-            $daysLater,
-            true);
+        $datesDaysLater = $this->businessDayCalculator->fromDays($startAt, $daysLater, true);
 
         $this->assertEquals($expected, $this->format($datesDaysLater));
     }
 
 
-    public function test_next_business_day()
+    public function testNextBusinessDay()
     {
         $this->businessDayPolicy->setIgnoreDaysOfWeek([DayOfWeek::SATURDAY, DayOfWeek::SUNDAY])
             ->addHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
@@ -106,6 +102,4 @@ class BusinessDayCalculatorTest extends TestCase
             return $date->format('Y-m-d');
         }, $dates);
     }
-
-
 }

@@ -2,7 +2,6 @@
 
 namespace Tests;
 
-
 use DateTime;
 use DSisconeto\BusinessDayCalculator\DayOfWeek;
 use DSisconeto\BusinessDayCalculator\BusinessDayPolicy;
@@ -21,13 +20,13 @@ class BusinessDayPolicyTest extends TestCase
         $this->specification = new BusinessDayPolicy();
     }
 
-    public function test_is_not_business_day_on_weekends()
+    public function testIsNotBusinessDayOnWeekends()
     {
         $this->specification->setIgnoreDaysOfWeek([DayOfWeek::SUNDAY, DayOfWeek::SATURDAY]);
         $this->assertFalse($this->specification->isBusinessDay(new DateTime('2018-11-03')));
     }
 
-    public function test_is_not_business_day_on_holidays()
+    public function testIsNotBusinessDayOnHolidays()
     {
         $this->specification
             ->addHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
@@ -36,7 +35,7 @@ class BusinessDayPolicyTest extends TestCase
         $this->assertFalse($this->specification->isBusinessDay(new DateTime('2018-11-15')));
     }
 
-    public function test_is_not_business_day_on_holidays_and_weekends()
+    public function testIsNotBusinessDayOnHolidaysAndWeekends()
     {
         $this->specification
             ->setIgnoreDaysOfWeek([DayOfWeek::SUNDAY, DayOfWeek::SATURDAY])
@@ -49,7 +48,7 @@ class BusinessDayPolicyTest extends TestCase
         $this->assertFalse($this->specification->isBusinessDay(new DateTime('2018-11-04')));
     }
 
-    public function test_is_business_day_with_weekends_and_holidays()
+    public function testIsBusinessDayWithWeekendsAndHolidays()
     {
         $this->specification
             ->setIgnoreDaysOfWeek([DayOfWeek::SUNDAY, DayOfWeek::SATURDAY])
@@ -58,5 +57,4 @@ class BusinessDayPolicyTest extends TestCase
         $this->assertTrue($this->specification->isBusinessDay(new DateTime('2018-11-14')));
         $this->assertTrue($this->specification->isBusinessDay(new DateTime('2018-11-29')));
     }
-
 }
