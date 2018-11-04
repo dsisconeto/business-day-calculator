@@ -29,7 +29,7 @@ class BusinessDayPolicyTest extends TestCase
     public function testIsNotBusinessDayOnHolidays()
     {
         $this->specification
-            ->addHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
+            ->setHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
 
         $this->assertFalse($this->specification->isBusinessDay(new DateTime('2018-11-02')));
         $this->assertFalse($this->specification->isBusinessDay(new DateTime('2018-11-15')));
@@ -39,7 +39,7 @@ class BusinessDayPolicyTest extends TestCase
     {
         $this->specification
             ->setIgnoreDaysOfWeek([DayOfWeek::SUNDAY, DayOfWeek::SATURDAY])
-            ->addHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
+            ->setHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
 
         $this->assertFalse($this->specification->isBusinessDay(new DateTime('2018-11-02')));
         $this->assertFalse($this->specification->isBusinessDay(new DateTime('2018-11-15')));
@@ -52,7 +52,7 @@ class BusinessDayPolicyTest extends TestCase
     {
         $this->specification
             ->setIgnoreDaysOfWeek([DayOfWeek::SUNDAY, DayOfWeek::SATURDAY])
-            ->addHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
+            ->setHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
 
         $this->assertTrue($this->specification->isBusinessDay(new DateTime('2018-11-14')));
         $this->assertTrue($this->specification->isBusinessDay(new DateTime('2018-11-29')));

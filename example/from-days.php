@@ -8,7 +8,7 @@ use DSisconeto\BusinessDayCalculator\DayOfWeek;
 $businessDayPolicy = new BusinessDayPolicy();
 $businessDayCalculator = new BusinessDaysCalculator($businessDayPolicy);
 $businessDayPolicy->setIgnoreDaysOfWeek([DayOfWeek::SUNDAY, DayOfWeek::SATURDAY])
-    ->addHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
+    ->setHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
 
 
 

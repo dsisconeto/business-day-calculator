@@ -23,9 +23,9 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
      */
     private $dateFormat = 'Y-m-d';
     /**
-     * @var BusinessDayPolicy
+     * @var AdditionalPolicyInterface
      */
-    private $businessDayPolicyAdditional = null;
+    private $AdditionalPolicy = null;
 
 
     /**
@@ -34,12 +34,14 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
      */
     public function isBusinessDay(DateTime $day): bool
     {
-        if (is_null($this->businessDayPolicyAdditional)) {
+        if (is_null($this->AdditionalPolicy)) {
             return !$this->isIgnoreDayOfWeek($day) && !$this->isHoliday($day);
         }
-        return !$this->isIgnoreDayOfWeek($day)
-            && !$this->isHoliday($day)
-            && $this->businessDayPolicyAdditional->isBusinessDay($day);
+        return $this->AdditionalPolicy->isBusinessDay(
+            $day,
+            !$this->isIgnoreDayOfWeek($day),
+            !$this->isHoliday($day)
+        );
     }
 
     /**
@@ -64,20 +66,13 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
      * @param DateTime[] $holidays
      * @return BusinessDayPolicy
      */
-    public function addHolidays(array $holidays): BusinessDayPolicy
+    public function setHolidays(array $holidays): BusinessDayPolicy
     {
+        $this->holidays = [];
         foreach ($holidays as $holiday) {
-            $this->addHoliday($holiday);
+            $this->holidays[$holiday->format($this->dateFormat)] = $holiday;
         }
         return $this;
-    }
-
-    /**
-     * @param DateTime $holiday
-     */
-    public function addHoliday(DateTime $holiday)
-    {
-        $this->holidays[$holiday->format($this->dateFormat)] = $holiday;
     }
 
     /**
@@ -110,12 +105,12 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
     }
 
     /**
-     * @param BusinessDayPolicy $businessDayPolicyAdditional
+     * @param AdditionalPolicyInterface $AdditionalPolicy
      * @return BusinessDayPolicy
      */
-    public function setBusinessDayPolicyAdditional(BusinessDayPolicy $businessDayPolicyAdditional): BusinessDayPolicy
+    public function setAdditionalPolicy(AdditionalPolicyInterface $AdditionalPolicy): BusinessDayPolicy
     {
-        $this->businessDayPolicyAdditional = $businessDayPolicyAdditional;
+        $this->AdditionalPolicy = $AdditionalPolicy;
         return $this;
     }
 }

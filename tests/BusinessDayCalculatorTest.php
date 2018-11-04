@@ -79,7 +79,7 @@ class BusinessDayCalculatorTest extends TestCase
     public function testFromDayLaterWithAdditionalDays($ignoreDaysOfWeek, $holidays, $expected, $startAt, $daysLater)
     {
         $this->businessDayPolicy->setIgnoreDaysOfWeek($ignoreDaysOfWeek)
-            ->addHolidays($holidays);
+            ->setHolidays($holidays);
         $datesDaysLater = $this->businessDayCalculator->fromDays($startAt, $daysLater, true);
 
         $this->assertEquals($expected, $this->format($datesDaysLater));
@@ -89,7 +89,7 @@ class BusinessDayCalculatorTest extends TestCase
     public function testNextBusinessDay()
     {
         $this->businessDayPolicy->setIgnoreDaysOfWeek([DayOfWeek::SATURDAY, DayOfWeek::SUNDAY])
-            ->addHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
+            ->setHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
 
         $nextBusinessDay = $this->businessDayCalculator->nextBusinessDay(new DateTime('2018-11-02'));
 
