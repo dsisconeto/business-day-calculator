@@ -25,8 +25,7 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
     /**
      * @var AdditionalPolicyInterface
      */
-    private $AdditionalPolicy = null;
-
+    private $AdditionalPolicy;
 
     /**
      * @param DateTime $day
@@ -34,9 +33,10 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
      */
     public function isBusinessDay(DateTime $day): bool
     {
-        if (is_null($this->AdditionalPolicy)) {
+        if ($this->AdditionalPolicy === null) {
             return !$this->isIgnoreDayOfWeek($day) && !$this->isHoliday($day);
         }
+
         return $this->AdditionalPolicy->isBusinessDay(
             $day,
             !$this->isIgnoreDayOfWeek($day),
@@ -45,32 +45,28 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
     }
 
     /**
-     * @param DateTime $day
-     * @return bool
-     */
-    private function isIgnoreDayOfWeek(DateTime $day): bool
-    {
-        return array_key_exists($day->format('w'), $this->ignoreDaysOfWeek);
-    }
-
-    /**
-     * @param DateTime $holiday
-     * @return bool
-     */
-    private function isHoliday(DateTime $holiday): bool
-    {
-        return array_key_exists($holiday->format($this->dateFormat), $this->holidays);
-    }
-
-    /**
-     * @param DateTime[] $holidays
+     * @param array[] $holidays
      * @return BusinessDayPolicy
      */
     public function setHolidays(array $holidays): BusinessDayPolicy
     {
         $this->holidays = [];
         foreach ($holidays as $holiday) {
-            $this->holidays[$holiday->format($this->dateFormat)] = $holiday;
+
+            if ($holiday instanceof HolidayInterval) {
+                $this->setInterval($holiday);
+                continue;
+            }
+
+            if ($holiday instanceof HolidayUnique) {
+                $this->setUnique($holiday);
+                continue;
+            }
+
+            if ($holiday instanceof \DateTimeInterface) {
+                $this->setHoliday($holiday);
+                continue;
+            }
         }
         return $this;
     }
@@ -84,7 +80,6 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
         $this->ignoreDaysOfWeek = array_flip($ignoreDaysOfWeek);
         return $this;
     }
-
 
     /**
      * @return string
@@ -112,5 +107,51 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
     {
         $this->AdditionalPolicy = $AdditionalPolicy;
         return $this;
+    }
+
+
+    private function setUnique(HolidayUnique $holidayUnique): void
+    {
+        $this->setHoliday($holidayUnique->getDate());
+    }
+
+    private function setHoliday(DateTime $date): void
+    {
+        $this->holidays[$date->format($this->dateFormat)] = $date->format($this->dateFormat);
+    }
+
+
+    public function setInterval(HolidayInterval $holidayInterval): void
+    {
+        $period = new \DatePeriod(
+            $holidayInterval->getStart(),
+            \DateInterval::createFromDateString('1 day'),
+            $holidayInterval->getEnd()
+        );
+
+        /**
+         * @var DateTime $date
+         */
+        foreach ($period as $date) {
+            $this->setHoliday($date);
+        }
+    }
+
+    /**
+     * @param DateTime $day
+     * @return bool
+     */
+    private function isIgnoreDayOfWeek(DateTime $day): bool
+    {
+        return array_key_exists($day->format('w'), $this->ignoreDaysOfWeek);
+    }
+
+    /**
+     * @param DateTime $holiday
+     * @return bool
+     */
+    private function isHoliday(DateTime $holiday): bool
+    {
+        return array_key_exists($holiday->format($this->dateFormat), $this->holidays);
     }
 }
