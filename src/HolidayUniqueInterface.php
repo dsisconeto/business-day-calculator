@@ -5,7 +5,7 @@ namespace DSisconeto\BusinessDayCalculator;
 
 use DateTime;
 
-interface HolidayUnique
+interface HolidayUniqueInterface
 {
     public function getDate(): DateTime;
 }

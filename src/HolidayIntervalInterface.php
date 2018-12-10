@@ -3,7 +3,7 @@
 namespace DSisconeto\BusinessDayCalculator;
 
 
-interface HolidayInterval
+interface HolidayIntervalInterface
 {
 
     public function getStart(): \DateTime;

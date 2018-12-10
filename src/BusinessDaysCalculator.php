@@ -64,8 +64,7 @@ class BusinessDaysCalculator
      */
     private function fillDatePeriod(DateTime $startAt, DateTime $endAt): array
     {
-        $endAt = clone $endAt;
-        $endAt->modify('+1 day');
+        $endAt = (clone $endAt)->modify('+1 day');
         $period = new DatePeriod(
             $startAt,
             DateInterval::createFromDateString('1 day'),

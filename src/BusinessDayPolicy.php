@@ -51,14 +51,15 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
     public function setHolidays(array $holidays): BusinessDayPolicy
     {
         $this->holidays = [];
+
         foreach ($holidays as $holiday) {
 
-            if ($holiday instanceof HolidayInterval) {
+            if ($holiday instanceof HolidayIntervalInterface) {
                 $this->setInterval($holiday);
                 continue;
             }
 
-            if ($holiday instanceof HolidayUnique) {
+            if ($holiday instanceof HolidayUniqueInterface) {
                 $this->setUnique($holiday);
                 continue;
             }
@@ -70,6 +71,7 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
         }
         return $this;
     }
+
 
     /**
      * @param DayOfWeek[] $ignoreDaysOfWeek
@@ -109,8 +111,7 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
         return $this;
     }
 
-
-    private function setUnique(HolidayUnique $holidayUnique): void
+    private function setUnique(HolidayUniqueInterface $holidayUnique): void
     {
         $this->setHoliday($holidayUnique->getDate());
     }
@@ -120,13 +121,12 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
         $this->holidays[$date->format($this->dateFormat)] = $date->format($this->dateFormat);
     }
 
-
-    public function setInterval(HolidayInterval $holidayInterval): void
+    public function setInterval(HolidayIntervalInterface $holidayInterval): void
     {
         $period = new \DatePeriod(
             $holidayInterval->getStart(),
             \DateInterval::createFromDateString('1 day'),
-            $holidayInterval->getEnd()
+            $holidayInterval->getEnd()->modify('+1 day')
         );
 
         /**
