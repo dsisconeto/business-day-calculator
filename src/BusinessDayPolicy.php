@@ -45,6 +45,24 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
     }
 
     /**
+     * @param DateTime $day
+     * @return bool
+     */
+    private function isIgnoreDayOfWeek(DateTime $day): bool
+    {
+        return array_key_exists($day->format('w'), $this->ignoreDaysOfWeek);
+    }
+
+    /**
+     * @param DateTime $holiday
+     * @return bool
+     */
+    private function isHoliday(DateTime $holiday): bool
+    {
+        return array_key_exists($holiday->format($this->dateFormat), $this->holidays);
+    }
+
+    /**
      * @param array[] $holidays
      * @return BusinessDayPolicy
      */
@@ -72,6 +90,31 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
         return $this;
     }
 
+    public function setInterval(HolidayIntervalInterface $holidayInterval): void
+    {
+        $period = new \DatePeriod(
+            $holidayInterval->getStart(),
+            \DateInterval::createFromDateString('1 day'),
+            $holidayInterval->getEnd()->modify('+1 day')
+        );
+
+        /**
+         * @var DateTime $date
+         */
+        foreach ($period as $date) {
+            $this->setHoliday($date);
+        }
+    }
+
+    private function setHoliday(DateTime $date): void
+    {
+        $this->holidays[$date->format($this->dateFormat)] = $date->format($this->dateFormat);
+    }
+
+    private function setUnique(HolidayUniqueInterface $holidayUnique): void
+    {
+        $this->setHoliday($holidayUnique->getDate());
+    }
 
     /**
      * @param DayOfWeek[] $ignoreDaysOfWeek
@@ -109,49 +152,5 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
     {
         $this->AdditionalPolicy = $AdditionalPolicy;
         return $this;
-    }
-
-    private function setUnique(HolidayUniqueInterface $holidayUnique): void
-    {
-        $this->setHoliday($holidayUnique->getDate());
-    }
-
-    private function setHoliday(DateTime $date): void
-    {
-        $this->holidays[$date->format($this->dateFormat)] = $date->format($this->dateFormat);
-    }
-
-    public function setInterval(HolidayIntervalInterface $holidayInterval): void
-    {
-        $period = new \DatePeriod(
-            $holidayInterval->getStart(),
-            \DateInterval::createFromDateString('1 day'),
-            $holidayInterval->getEnd()->modify('+1 day')
-        );
-
-        /**
-         * @var DateTime $date
-         */
-        foreach ($period as $date) {
-            $this->setHoliday($date);
-        }
-    }
-
-    /**
-     * @param DateTime $day
-     * @return bool
-     */
-    private function isIgnoreDayOfWeek(DateTime $day): bool
-    {
-        return array_key_exists($day->format('w'), $this->ignoreDaysOfWeek);
-    }
-
-    /**
-     * @param DateTime $holiday
-     * @return bool
-     */
-    private function isHoliday(DateTime $holiday): bool
-    {
-        return array_key_exists($holiday->format($this->dateFormat), $this->holidays);
     }
 }
