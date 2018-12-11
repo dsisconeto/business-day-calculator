@@ -34,7 +34,7 @@ class BusinessDayCalculatorTest extends TestCase
      * @return array
      * @throws \Exception
      */
-    public function dataProviderForDayLaterWithAdditional(): array
+    public function dataProviderForDayLaterWithExtendable(): array
     {
 
         return [
@@ -75,10 +75,128 @@ class BusinessDayCalculatorTest extends TestCase
                     '2018-12-17',
                 ],
                 new DateTime('2018-11-01'),
-                30
+                30,
+                true
             ],
 
         ];
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function dataProviderForDateInterval(): array
+    {
+
+        return [
+            [
+                [DayOfWeek::SUNDAY, DayOfWeek::SATURDAY],
+                array_merge([new DateTime('2018-12-14')], $this->getHolidays()),
+                [
+                    '2018-12-17',
+                    '2018-12-18',
+                    '2018-12-19',
+                    '2018-12-20',
+                    '2018-12-21',
+                    '2018-12-24',
+                    '2018-12-26',
+                    '2018-12-27',
+                    '2018-12-28',
+                ],
+                new DateTime('2018-12-14'),
+                new DateTime('2018-12-28'),
+                false,
+            ],
+        ];
+    }
+
+
+    /**
+     * @param $ignoreDaysOfWeek
+     * @param $holidays
+     * @param $businessDaysExpected
+     * @param $startAt
+     * @param $daysLater
+     * @param $extendable
+     * @dataProvider dataProviderForDayLaterWithExtendable
+     */
+    public function testFromDayLaterWithDays(
+        $ignoreDaysOfWeek,
+        $holidays,
+        $businessDaysExpected,
+        $startAt,
+        $daysLater,
+        $extendable
+    ): void {
+        $this->businessDayPolicy->setIgnoreDaysOfWeek($ignoreDaysOfWeek)
+            ->setHolidays($holidays);
+        $businessDays = $this->businessDayCalculator->fromDays($startAt, $daysLater, $extendable);
+        $this->assertEquals($businessDaysExpected, $this->format($businessDays->getDates()));
+        $this->assertEquals(count($businessDaysExpected), $businessDays->count());
+        $this->assertEquals(
+            $businessDaysExpected[0],
+            $businessDays->getDateStart()->format('Y-m-d')
+        );
+        $this->assertEquals(
+            $businessDaysExpected[count($businessDaysExpected) - 1],
+            $businessDays->getDateEnd()->format('Y-m-d')
+        );
+    }
+
+    /**
+     * @param $ignoreDaysOfWeek
+     * @param $holidays
+     * @param $businessDaysExpected
+     * @param $startAt
+     * @param $endAt
+     * @param $extendable
+     * @dataProvider dataProviderForDateInterval
+     */
+    public function testFromDateInterval(
+        $ignoreDaysOfWeek,
+        $holidays,
+        $businessDaysExpected,
+        $startAt,
+        $endAt,
+        $extendable
+    ): void {
+        $this->businessDayPolicy->setIgnoreDaysOfWeek($ignoreDaysOfWeek)
+            ->setHolidays($holidays);
+
+        $businessDays = $this->businessDayCalculator->fromInterval($startAt, $endAt, $extendable);
+
+        $this->assertEquals($businessDaysExpected, $this->format($businessDays->getDates()));
+        $this->assertEquals(count($businessDaysExpected), $businessDays->count());
+        $this->assertEquals(
+            $businessDaysExpected[0],
+            $businessDays->getDateStart()->format('Y-m-d')
+        );
+        $this->assertEquals(
+            $businessDaysExpected[count($businessDaysExpected) - 1],
+            $businessDays->getDateEnd()->format('Y-m-d')
+        );
+    }
+
+    public function testNextBusinessDay(): void
+    {
+        $this->businessDayPolicy
+            ->setHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')])
+            ->setIgnoreDaysOfWeek([DayOfWeek::SUNDAY, DayOfWeek::SATURDAY]);
+
+        $nextBusinessDay = $this->businessDayCalculator->nextBusinessDay(new DateTime('2018-11-02'));
+
+
+        $expected = (new DateTime('2018-11-05'))->format('Y-m-d');
+        $this->assertEquals($expected, $nextBusinessDay->format('Y-m-d'));
+    }
+
+
+    private function format($dates): array
+    {
+        return array_map(function (DateTime $date) {
+            return $date->format('Y-m-d');
+        }, $dates);
     }
 
     /**
@@ -101,45 +219,5 @@ class BusinessDayCalculatorTest extends TestCase
             new DateTime('2018-11-15'),
             new DateTime('2018-12-25')
         ];
-    }
-
-    /**
-     * @param $ignoreDaysOfWeek
-     * @param $holidays
-     * @param $expected
-     * @param $startAt
-     * @param $daysLater
-     * @dataProvider dataProviderForDayLaterWithAdditional
-     */
-    public function testFromDayLaterWithAdditionalDays(
-        $ignoreDaysOfWeek,
-        $holidays,
-        $expected,
-        $startAt,
-        $daysLater
-    ): void {
-        $this->businessDayPolicy->setIgnoreDaysOfWeek($ignoreDaysOfWeek)
-            ->setHolidays($holidays);
-        $datesDaysLater = $this->businessDayCalculator->fromDays($startAt, $daysLater, true);
-
-        $this->assertEquals($expected, $this->format($datesDaysLater->getDates()));
-    }
-
-    private function format($dates): array
-    {
-        return array_map(function (DateTime $date) {
-            return $date->format('Y-m-d');
-        }, $dates);
-    }
-
-    public function testNextBusinessDay(): void
-    {
-        $this->businessDayPolicy
-            ->setIgnoreDaysOfWeek([DayOfWeek::SATURDAY, DayOfWeek::SUNDAY])
-            ->setHolidays([new DateTime('2018-11-02'), new DateTime('2018-11-15')]);
-
-        $nextBusinessDay = $this->businessDayCalculator->nextBusinessDay(new DateTime('2018-11-02'));
-
-        $this->assertEquals($nextBusinessDay->format('Y-m-d'), (new DateTime('2018-11-05'))->format('Y-m-d'));
     }
 }

@@ -28,7 +28,7 @@ class BusinessDays
     {
         [array_key_first($dates) => $this->start, array_key_last($dates) => $this->end] = $dates;
 
-        $this->dates = $dates;
+        $this->dates = array_values($dates);
     }
 
     public function getDateEnd(): DateTime

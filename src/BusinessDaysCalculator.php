@@ -30,26 +30,26 @@ class BusinessDaysCalculator
     /**
      * @param DateTime $startAt
      * @param int $days
-     * @param bool $extendDate
+     * @param bool $extendable
      * @return BusinessDays
      */
-    public function fromDays(DateTime $startAt, int $days, bool $extendDate = false): BusinessDays
+    public function fromDays(DateTime $startAt, int $days, bool $extendable): BusinessDays
     {
         $dateEnd = (clone $startAt)->modify("+{$days} day");
-        return $this->calculate($startAt, $dateEnd, $extendDate);
+        return $this->calculate($startAt, $dateEnd, $extendable);
     }
 
     /**
      * @param DateTime $startAt
      * @param DateTime $endAt
-     * @param bool $extendDate
+     * @param bool $extendable
      * @return BusinessDays
      */
-    private function calculate(DateTime $startAt, DateTime $endAt, bool $extendDate): BusinessDays
+    private function calculate(DateTime $startAt, DateTime $endAt, bool $extendable): BusinessDays
     {
         $dates = $this->fillDatePeriod($startAt, $endAt);
 
-        if ($extendDate) {
+        if ($extendable) {
             $dates = $this->calculateExtendingDate($dates);
         } else {
             $dates = $this->calculateWithoutExtendingTheDate($dates);
@@ -85,10 +85,10 @@ class BusinessDaysCalculator
     private function calculateExtendingDate(array $dates): array
     {
         while (true) {
-            $extendDateDates = $this->calculateAdditionalDate($dates);
+            $extendableDates = $this->calculateAdditionalDate($dates);
             $filteredDates = $this->filterDates($dates);
-            $dates = array_merge($filteredDates, $extendDateDates);
-            if (count($extendDateDates) === 0) {
+            $dates = array_merge($filteredDates, $extendableDates);
+            if (count($extendableDates) === 0) {
                 break;
             }
         }
@@ -101,27 +101,27 @@ class BusinessDaysCalculator
      */
     private function calculateAdditionalDate(array $dates): array
     {
-        $extendDateDates = [];
+        $extendableDates = [];
         foreach ($dates as $date) {
             if ($this->businessDayPolicy->isBusinessDay($date)) {
                 continue;
             }
-            $extendDateDates[] = $this->nextAdditionalDate($extendDateDates, $dates);
+            $extendableDates[] = $this->nextAdditionalDate($extendableDates, $dates);
         }
-        return $extendDateDates;
+        return $extendableDates;
     }
 
     /**
-     * @param DateTime[] $extendDateDates
+     * @param DateTime[] $extendableDates
      * @param DateTime[] $dates
      * @return DateTime
      */
-    private function nextAdditionalDate(array $extendDateDates, array $dates): DateTime
+    private function nextAdditionalDate(array $extendableDates, array $dates): DateTime
     {
-        if (empty($extendDateDates)) {
+        if (empty($extendableDates)) {
             return (clone $dates[count($dates) - 1])->modify('+1 day');
         }
-        return (clone $extendDateDates[count($extendDateDates) - 1])->modify('+1 day');
+        return (clone $extendableDates[count($extendableDates) - 1])->modify('+1 day');
     }
 
     /**
@@ -147,12 +147,12 @@ class BusinessDaysCalculator
     /**
      * @param DateTime $startAt
      * @param DateTime $endAt
-     * @param bool $extendDate
+     * @param bool $extendable
      * @return BusinessDays
      */
-    public function fromInterval(DateTime $startAt, DateTime $endAt, bool $extendDate): BusinessDays
+    public function fromInterval(DateTime $startAt, DateTime $endAt, bool $extendable): BusinessDays
     {
-        return $this->calculate($startAt, $endAt, $extendDate);
+        return $this->calculate($startAt, $endAt, $extendable);
     }
 
     /**
