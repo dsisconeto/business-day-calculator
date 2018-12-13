@@ -2,7 +2,6 @@
 
 namespace DSisconeto\BusinessDayCalculator;
 
-
 use DateTime;
 
 class BusinessDays
@@ -26,9 +25,8 @@ class BusinessDays
      */
     public function __construct(array $dates)
     {
-        [array_key_first($dates) => $this->start, array_key_last($dates) => $this->end] = $dates;
-
         $this->dates = array_values($dates);
+        [0 => $this->start, count($this->dates) - 1 => $this->end] = $this->dates;
     }
 
     public function getDateEnd(): DateTime

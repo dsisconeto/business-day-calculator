@@ -71,7 +71,6 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
         $this->holidays = [];
 
         foreach ($holidays as $holiday) {
-
             if ($holiday instanceof HolidayIntervalInterface) {
                 $this->setInterval($holiday);
                 continue;
@@ -145,12 +144,12 @@ class BusinessDayPolicy implements BusinessDayPolicyInterface
     }
 
     /**
-     * @param AdditionalPolicyInterface $AdditionalPolicy
+     * @param AdditionalPolicyInterface $additionalPolicy
      * @return BusinessDayPolicy
      */
-    public function setAdditionalPolicy(AdditionalPolicyInterface $AdditionalPolicy): BusinessDayPolicy
+    public function setAdditionalPolicy(AdditionalPolicyInterface $additionalPolicy): BusinessDayPolicy
     {
-        $this->AdditionalPolicy = $AdditionalPolicy;
+        $this->AdditionalPolicy = $additionalPolicy;
         return $this;
     }
 }

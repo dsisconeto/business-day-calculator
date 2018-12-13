@@ -83,9 +83,8 @@ class BusinessDayPolicyTest extends TestCase
     /**
      * @throws \Exception
      */
-    public function testDateIntervalAndDateUnique()
+    public function testDateIntervalAndDateUnique(): void
     {
-
         $holidayInterval = $this->factoryHolidayInterval('2018-06-01', '2018-06-10');
         $holidayUnique = $this->factoryHolidayUnique('2018-12-25');
 
@@ -97,7 +96,7 @@ class BusinessDayPolicyTest extends TestCase
 
         $this->businessDayPolicy->setHolidays($holidays);
 
-        $expectedIsNotBusinessDay = [
+        $isNotBusinessDay = [
             '2018-06-01',
             '2018-06-02',
             '2018-06-03',
@@ -112,24 +111,22 @@ class BusinessDayPolicyTest extends TestCase
             '2018-12-25'
         ];
 
-        $expectedIsBusinessDay = [
+        $isBusinessDay = [
             '2018-05-31',
             '2018-06-11',
             '2018-12-26'
         ];
 
-        foreach ($expectedIsNotBusinessDay as $holiday) {
+        foreach ($isNotBusinessDay as $holiday) {
             $isBusinessDay = $this->businessDayPolicy->isBusinessDay(new DateTime($holiday));
             $this->assertFalse($isBusinessDay, "$holiday deveria ser um feriado");
         }
 
 
-        foreach ($expectedIsBusinessDay as $holiday) {
+        foreach ($isBusinessDay as $holiday) {
             $isBusinessDay = $this->businessDayPolicy->isBusinessDay(new DateTime($holiday));
             $this->assertTrue($isBusinessDay, "$holiday não deveria ser um feriado");
         }
-
-
     }
 
     /**
@@ -140,8 +137,7 @@ class BusinessDayPolicyTest extends TestCase
      */
     private function factoryHolidayInterval(string $startAt, string $endAt): HolidayIntervalInterface
     {
-        $holidayInterval = new class implements HolidayIntervalInterface
-        {
+        $holidayInterval = new class implements HolidayIntervalInterface {
             private $start;
             private $end;
 
@@ -179,8 +175,7 @@ class BusinessDayPolicyTest extends TestCase
      */
     private function factoryHolidayUnique(string $date): HolidayUniqueInterface
     {
-        $holidayUnique = new class implements HolidayUniqueInterface
-        {
+        $holidayUnique = new class implements HolidayUniqueInterface {
             private $date;
 
             /**
@@ -201,6 +196,4 @@ class BusinessDayPolicyTest extends TestCase
 
         return $holidayUnique;
     }
-
-
 }

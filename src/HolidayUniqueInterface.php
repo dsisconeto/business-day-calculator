@@ -1,7 +1,5 @@
 <?php
-
 namespace DSisconeto\BusinessDayCalculator;
-
 
 use DateTime;
 
